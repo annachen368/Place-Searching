@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 *.iml
 .gradle
 /local.properties
@@ -8,6 +9,8 @@
 /build
 /captures
 =======
+=======
+>>>>>>> e45cb5595c37f07d06200f8399fe84e84b2faeed
 # Built application files
 *.apk
 *.ap_
@@ -40,4 +43,7 @@ proguard/
 
 # Android Studio captures folder
 captures/
+<<<<<<< HEAD
 >>>>>>> 8470c088b5df9bb2849c1aa19fa9473abb75602d
+=======
+>>>>>>> e45cb5595c37f07d06200f8399fe84e84b2faeed
