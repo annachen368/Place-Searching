@@ -30,6 +30,9 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static ArrayAdapter<String> adapter;
+    private static String[] itemArrayList = new String[] {};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,8 +50,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Hi", Toast.LENGTH_LONG).show();
         }
     }
-    private static final String[] itemArrayList = new String[] { "Belgium",
-            "France", "France_", "Italy", "Germany", "Spain" };
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 // Inflate the options menu from XML
@@ -68,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         searchAutoComplete.setTextColor(Color.WHITE);
         searchAutoComplete.setDropDownBackgroundDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.abc_popup_background_mtrl_mult));
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+        adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_dropdown_item_1line, itemArrayList);
         searchAutoComplete.setAdapter(adapter);
 
@@ -81,11 +83,13 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                Log.i("text", "hi");
+                Log.i("text", newText);
 
                 // download places
                 DownloadTask downloadTask = new DownloadTask();
-                downloadTask.execute("https://maps.googleapis.com/maps/api/place/autocomplete/json?input=Vict&types=geocode&language=fr&key=AIzaSyC5uHROOrPPPbyCN40nIEx90laVue8pjYY")
+                downloadTask.execute
+                        ("https://maps.googleapis.com/maps/api/place/autocomplete/json?input="+newText+
+                                "&types=geocode&language=en&key=AIzaSyC5uHROOrPPPbyCN40nIEx90laVue8pjYY");
 
                 return true;
             }
@@ -104,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
             String jsonStr = null;
 
             try {
-                final String BASE_URL = params[0];
+                final String BASE_URL = params[0].replaceAll(" ","+");
 
                 URL url = new URL(BASE_URL);
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -128,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 jsonStr = buffer.toString();
             } catch (IOException e) {
-                android.util.Log.e("DOWNLOAD", "Error ", e);
+                Log.e("DOWNLOAD", "Error ", e);
                 jsonStr = null;
             } finally {
                 if (urlConnection != null) {
@@ -138,25 +142,20 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         reader.close();
                     } catch (final IOException e) {
-                        android.util.Log.e("DOWNLOAD", "Error closing stream", e);
+                        Log.e("DOWNLOAD", "Error closing stream", e);
                     }
                 }
             }
 
             String[] rlt = null;
             try {
-                JSONObject jsonObject = new JSONObject(jsonStr).getJSONObject("photos");
+                JSONArray jsonArray = new JSONObject(jsonStr).getJSONArray("predictions");
 
-                JSONArray jsonArray = (JSONArray) jsonObject.get("photo");
                 rlt = new String[jsonArray.length()];
 
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject obj = (JSONObject) jsonArray.get(i);
-                    int farm = obj.getInt("farm");
-                    String server = obj.getString("server");
-                    String id = obj.getString("id");
-                    String secret = obj.getString("secret");
-                    rlt[i] = "http://farm"+farm+".static.flickr.com/"+server+"/"+id+"_"+secret+".jpg";
+                    rlt[i] = obj.getString("description");
                 }
             }catch (JSONException e) {
                 e.printStackTrace();
@@ -165,11 +164,12 @@ public class MainActivity extends AppCompatActivity {
             return rlt;
         }
 
-//        @Override
-//        protected void onPostExecute(String[] rlt) {
-//            Intent intent = new Intent(getActivity(), Main2Activity.class);
-//            intent.putExtra(Intent.EXTRA_TEXT, rlt);
-//            startActivity(intent);
-//        }
+        @Override
+        protected void onPostExecute(String[] rlt) {
+            if(rlt != null) {
+                adapter.addAll(rlt);
+                adapter.notifyDataSetChanged();
+            }
+        }
     }
 }
