@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-# Place_Searching
-=======
-# Place-Searching
->>>>>>> e45cb5595c37f07d06200f8399fe84e84b2faeed
+# Place Searching
+
+<img src="http://i.imgur.com/3Uq0joD.png" width="288" height="480" />
+<img src="http://i.imgur.com/7aHxjf1.png" width="288" height="480" />
