@@ -10,7 +10,7 @@
 
 >  java.io.FileNotFoundException: https://maps.googleapis.com/maps/api/place/autocomplete/json?input=mountain &types=geocode&language=en&key=AIzaSyC5uHROOrPPPbyCN40nIEx90laVue8pjYY
 
-Solution: I replaced all space of input with '+'.
+Solution: I replaced all spaces of input with '+'.
 
 2.Exception dispatching input event
 
@@ -22,5 +22,10 @@ Solution: I implemented "searchView.setOnSuggestionListener"
 
 #### Where could the user experience break? How will you prevent this?
 
+If there is no Wifi or a Signal, users cannot search for the places. 
+
 #### What other improvements can be made?
+
+Cache the input: if the input has already been stored at HashTable or Pool, there is no need to download the places information again.
+Display map: we have lat and lng so it will be great to display location on Google map.
 
