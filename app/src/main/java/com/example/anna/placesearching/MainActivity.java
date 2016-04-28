@@ -4,6 +4,8 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pools;
@@ -32,32 +34,17 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
 
     private static ArrayAdapter<String> adapter;
-//    private static SearchAutoCompleteAdapter adapter;
     private static String[] itemArrayList = new String[] {};
-//    private static String[] placeIdList = new String[] {};
-//    private static Place[] placeList = new Place[]{};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        if (getIntent() != null) {
-            handleIntent(getIntent());
-        }
-    }
-
-    private void handleIntent(Intent intent) {
-        // Special processing of the incoming intent only occurs if the if the action specified
-        // by the intent is ACTION_SEARCH.
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            Toast.makeText(getApplicationContext(), "Hi", Toast.LENGTH_LONG).show();
-        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-// Inflate the options menu from XML
+        // Inflate the options menu from XML
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
 
@@ -76,9 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_dropdown_item_1line, itemArrayList);
-//        adapter = new SearchAutoCompleteAdapter(this, android.R.layout.simple_dropdown_item_1line, descriptionList, placeIdList);
-//        adapter = new SearchAutoCompleteAdapter(this, android.R.layout.simple_dropdown_item_1line, placeList);
-        searchAutoComplete.setAdapter(adapter);
+          searchAutoComplete.setAdapter(adapter);
 
         // check if users type something
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -90,13 +75,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 Log.i("text", newText);
+                newText = newText.replaceAll("  ", " ").replaceAll(" ", "\\+");
+                Log.i("text", newText);
 
                 // download places
                 DownloadTask downloadTask = new DownloadTask();
                 downloadTask.execute
-                        ("https://maps.googleapis.com/maps/api/place/autocomplete/json?input="+newText+
+                        ("https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" + newText +
                                 "&types=geocode&language=en&key=AIzaSyC5uHROOrPPPbyCN40nIEx90laVue8pjYY");
-
                 return true;
             }
         });
@@ -110,11 +96,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onSuggestionClick(int position) {
-//                Log.i("hi",adapter.getItem(position));
                 String input = adapter.getItem(position);
                 DownloadTask2 downloadTask = new DownloadTask2();
-                downloadTask.execute("https://maps.googleapis.com/maps/api/place/autocomplete/json?input="+input+
-                "&types=geocode&language=en&key=AIzaSyC5uHROOrPPPbyCN40nIEx90laVue8pjYY");
+                downloadTask.execute("https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" + input +
+                        "&types=geocode&language=en&key=AIzaSyC5uHROOrPPPbyCN40nIEx90laVue8pjYY");
+
                 return true;
             }
         });
@@ -133,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
             String jsonStr = null;
 
             try {
-                final String BASE_URL = params[0].replaceAll(" ","+");
+                final String BASE_URL = params[0];
 
                 URL url = new URL(BASE_URL);
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -172,27 +158,23 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
+
             String[] rlt = null;
-//            Place[] places = null;
-            try {
-                JSONArray jsonArray = new JSONObject(jsonStr).getJSONArray("predictions");
+            if(jsonStr != null) {
+                try {
+                    JSONArray jsonArray = new JSONObject(jsonStr).getJSONArray("predictions");
 
-                rlt = new String[jsonArray.length()];
-//                places = new Place[jsonArray.length()];
+                    rlt = new String[jsonArray.length()];
 
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject obj = (JSONObject) jsonArray.get(i);
-                    rlt[i] = obj.getString("description");
-//                    places[i] = new Place();
-//                    places[i].description = obj.getString("description");
-//                    places[i].place_id = obj.getString("place_id");
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject obj = (JSONObject) jsonArray.get(i);
+                        rlt[i] = obj.getString("description");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            }catch (JSONException e) {
-                e.printStackTrace();
             }
-
             return rlt;
-//            return places;
         }
 
         @Override
@@ -254,43 +236,30 @@ public class MainActivity extends AppCompatActivity {
             }
 
             String[] rlt = null;
-//            Place[] places = null;
-            try {
-                JSONArray jsonArray = new JSONObject(jsonStr).getJSONArray("predictions");
+            if(jsonStr != null) {
+                try {
+                    JSONArray jsonArray = new JSONObject(jsonStr).getJSONArray("predictions");
 
-                rlt = new String[jsonArray.length()];
-//                places = new Place[jsonArray.length()];
+                    rlt = new String[jsonArray.length()];
 
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject obj = (JSONObject) jsonArray.get(i);
-                    rlt[i] = obj.getString("place_id");
-//                    places[i] = new Place();
-//                    places[i].description = obj.getString("description");
-//                    places[i].place_id = obj.getString("place_id");
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject obj = (JSONObject) jsonArray.get(i);
+                        rlt[i] = obj.getString("place_id");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            }catch (JSONException e) {
-                e.printStackTrace();
             }
-
             return rlt;
-//            return places;
         }
 
         @Override
         protected void onPostExecute(String[] rlt) {
             if(rlt != null) {
-//                adapter.addAll(rlt);
-//                adapter.notifyDataSetChanged();
-//                Log.i("hi",rlt[0]);
                 Intent intent = new Intent(getApplication(), DetailActivity.class);
                 intent.putExtra(Intent.EXTRA_TEXT, rlt[0]);
                 startActivity(intent);
             }
         }
     }
-}
-
-class Place {
-    String description;
-    String place_id;
 }

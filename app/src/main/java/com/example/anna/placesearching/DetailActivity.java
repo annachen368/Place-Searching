@@ -95,25 +95,25 @@ public class DetailActivity extends AppCompatActivity {
             }
 
             String[] rlt = new String[5];
-            try {
-                JSONObject jsonObject = new JSONObject(jsonStr).getJSONObject("result");
-                JSONObject location = jsonObject.getJSONObject("geometry").getJSONObject("location");
-                rlt[0] = jsonObject.getString("icon");
-                rlt[1] = location.getString("lat");
-                rlt[2] = location.getString("lng");
-                rlt[3] = jsonObject.getString("scope");
-                rlt[4] = jsonObject.getString("name");
-            }catch (JSONException e) {
-                e.printStackTrace();
+            if(jsonStr != null) {
+                try {
+                    JSONObject jsonObject = new JSONObject(jsonStr).getJSONObject("result");
+                    JSONObject location = jsonObject.getJSONObject("geometry").getJSONObject("location");
+                    rlt[0] = jsonObject.getString("icon");
+                    rlt[1] = location.getString("lat");
+                    rlt[2] = location.getString("lng");
+                    rlt[3] = jsonObject.getString("scope");
+                    rlt[4] = jsonObject.getString("name");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
-
             return rlt;
         }
 
         @Override
         protected void onPostExecute(String[] rlt) {
             if(rlt != null) {
-//                Log.i("icon", rlt[0]);
                 ImageView icon = (ImageView)findViewById(R.id.place_icon);
                 Glide.with(getApplicationContext()).load(rlt[0]).into(icon);
 
