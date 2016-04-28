@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.support.v7.widget.SearchView;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -31,7 +32,10 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
 
     private static ArrayAdapter<String> adapter;
+//    private static SearchAutoCompleteAdapter adapter;
     private static String[] itemArrayList = new String[] {};
+//    private static String[] placeIdList = new String[] {};
+//    private static Place[] placeList = new Place[]{};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_dropdown_item_1line, itemArrayList);
+//        adapter = new SearchAutoCompleteAdapter(this, android.R.layout.simple_dropdown_item_1line, descriptionList, placeIdList);
+//        adapter = new SearchAutoCompleteAdapter(this, android.R.layout.simple_dropdown_item_1line, placeList);
         searchAutoComplete.setAdapter(adapter);
 
         // check if users type something
@@ -94,6 +100,25 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                Log.i("click","select");
+                return true;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+//                Log.i("hi",adapter.getItem(position));
+                String input = adapter.getItem(position);
+                DownloadTask2 downloadTask = new DownloadTask2();
+                downloadTask.execute("https://maps.googleapis.com/maps/api/place/autocomplete/json?input="+input+
+                "&types=geocode&language=en&key=AIzaSyC5uHROOrPPPbyCN40nIEx90laVue8pjYY");
+                return true;
+            }
+        });
+
 
         return true;
     }
@@ -148,20 +173,26 @@ public class MainActivity extends AppCompatActivity {
             }
 
             String[] rlt = null;
+//            Place[] places = null;
             try {
                 JSONArray jsonArray = new JSONObject(jsonStr).getJSONArray("predictions");
 
                 rlt = new String[jsonArray.length()];
+//                places = new Place[jsonArray.length()];
 
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject obj = (JSONObject) jsonArray.get(i);
                     rlt[i] = obj.getString("description");
+//                    places[i] = new Place();
+//                    places[i].description = obj.getString("description");
+//                    places[i].place_id = obj.getString("place_id");
                 }
             }catch (JSONException e) {
                 e.printStackTrace();
             }
 
             return rlt;
+//            return places;
         }
 
         @Override
@@ -172,4 +203,94 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    private class DownloadTask2 extends AsyncTask<String, Void, String[]> {
+
+        @Override
+        protected String[] doInBackground(String... params) {
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+
+            String jsonStr = null;
+
+            try {
+                final String BASE_URL = params[0].replaceAll(" ","+");
+
+                URL url = new URL(BASE_URL);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.connect();
+
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+                    // Nothing to do.
+                    jsonStr = null;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+                    jsonStr = null;
+                }
+                jsonStr = buffer.toString();
+            } catch (IOException e) {
+                Log.e("DOWNLOAD", "Error ", e);
+                jsonStr = null;
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e("DOWNLOAD", "Error closing stream", e);
+                    }
+                }
+            }
+
+            String[] rlt = null;
+//            Place[] places = null;
+            try {
+                JSONArray jsonArray = new JSONObject(jsonStr).getJSONArray("predictions");
+
+                rlt = new String[jsonArray.length()];
+//                places = new Place[jsonArray.length()];
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject obj = (JSONObject) jsonArray.get(i);
+                    rlt[i] = obj.getString("place_id");
+//                    places[i] = new Place();
+//                    places[i].description = obj.getString("description");
+//                    places[i].place_id = obj.getString("place_id");
+                }
+            }catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            return rlt;
+//            return places;
+        }
+
+        @Override
+        protected void onPostExecute(String[] rlt) {
+            if(rlt != null) {
+//                adapter.addAll(rlt);
+//                adapter.notifyDataSetChanged();
+//                Log.i("hi",rlt[0]);
+                Intent intent = new Intent(getApplication(), DetailActivity.class);
+                intent.putExtra(Intent.EXTRA_TEXT, rlt[0]);
+                startActivity(intent);
+            }
+        }
+    }
+}
+
+class Place {
+    String description;
+    String place_id;
 }
