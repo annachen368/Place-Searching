@@ -4,7 +4,7 @@
 <img src="http://i.imgur.com/amrni57.png" width="288" height="480" />
 <img src="http://i.imgur.com/Bky2fzS.png" width="288" height="480" />
 
-#### Error conditions I encountered: How should these be handled?
+#### 1. Error conditions I encountered: How should these be handled?
 
 1.FileNotFoundException
 
@@ -20,11 +20,11 @@ Solution: I replaced all spaces of input with '+'.
 
 Solution: I implemented "searchView.setOnSuggestionListener" 
 
-#### Where could the user experience break? How will you prevent this?
+#### 2. Where could the user experience break? How will you prevent this?
 
 If there is no Wifi or a Signal, users cannot search for the places. Check if the JSON equals to null before parsing it.
 
-#### What other improvements can be made?
+#### 3. What other improvements can be made?
 
 + Cache the input: if the input has already been stored at HashTable or Pool, there is no need to download the places information again.
 + Display map: we have lat and lng so it will be great to display location on Google map.
