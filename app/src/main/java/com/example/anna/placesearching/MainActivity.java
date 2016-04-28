@@ -30,16 +30,24 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashSet;
 
 public class MainActivity extends AppCompatActivity {
 
     private static ArrayAdapter<String> adapter;
     private static String[] itemArrayList = new String[] {};
+    private static HashSet<String> set = new HashSet<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    protected void onDestroy() {
+        set.clear();
+        super.onDestroy();
     }
 
     @Override
@@ -74,15 +82,15 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                Log.i("text", newText);
-                newText = newText.replaceAll("  ", " ").replaceAll(" ", "\\+");
-                Log.i("text", newText);
-
-                // download places
-                DownloadTask downloadTask = new DownloadTask();
-                downloadTask.execute
-                        ("https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" + newText +
-                                "&types=geocode&language=en&key=AIzaSyC5uHROOrPPPbyCN40nIEx90laVue8pjYY");
+                newText = newText.replaceAll(" ", "\\+");
+                if(!set.contains(newText)) {
+                    set.add(newText);
+                    // download places
+                    DownloadTask downloadTask = new DownloadTask();
+                    downloadTask.execute
+                            ("https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" + newText +
+                                    "&types=geocode&language=en&key=AIzaSyC5uHROOrPPPbyCN40nIEx90laVue8pjYY");
+                }
                 return true;
             }
         });
@@ -262,4 +270,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+
 }
