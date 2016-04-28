@@ -22,7 +22,7 @@ Solution: I implemented "searchView.setOnSuggestionListener"
 
 #### Where could the user experience break? How will you prevent this?
 
-If there is no Wifi or a Signal, users cannot search for the places. 
+If there is no Wifi or a Signal, users cannot search for the places. Check if the JSON equals to null before parsing it.
 
 #### What other improvements can be made?
 
