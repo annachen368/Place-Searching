@@ -28,4 +28,5 @@ If there is no Wifi or a Signal, users cannot search for the places. Check if th
 
 + Cache the input: if the input has already been stored at HashTable or Pool, there is no need to download the places information again.
 + Display map: we have lat and lng so it will be great to display location on Google map.
++ Custom adapter: it allows us to add place_id and description(place name) while parsing the JSON at the same time.
 
